@@ -1,0 +1,115 @@
+.chats {
+  flex: 2;
+  height: 100%;
+  border-left: 3px solid #dddddd35;
+  border-right: 3px solid #dddddd35;
+  display: flex;
+  flex-direction: column;
+
+  /* ===== TOP BAR ===== */
+  .top {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #dddddd35;
+  }
+  /* ===== Center BAR ===== */
+  .center {
+    flex: 1;
+  }
+  /* ===== Bottom BAR ===== */
+
+  .bottom {
+    padding: 10px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 3px solid #dddddd35;
+    margin-top: auto;
+  }
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: rgba(17, 25, 40, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+  }
+  .sendbtn {
+    background: rgba(17, 25, 40, 0.5);
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .sendbtn:hover {
+    background: rgba(9, 84, 223, 0.86);
+    transition: all 0.3s ease;
+  }
+
+  .emoji {
+    position: relative;
+  }
+  .picker {
+    position: absolute;
+    bottom: 50px;
+    right: -80px;
+    z-index: 999;
+  }
+  /* ===== USER INFO (LEFT) ===== */
+  .userinformation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .uname {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .udes {
+    margin: 0;
+    font-size: 13px;
+    color: rgb(159, 142, 142);
+  }
+
+  /* ===== RIGHT ICONS ===== */
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+}
+
+/* ===== ICON STYLE ===== */
+.iconsize {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.iconsize:hover {
+  opacity: 20;
+}

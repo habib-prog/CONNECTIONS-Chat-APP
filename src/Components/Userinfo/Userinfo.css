@@ -1,0 +1,40 @@
+.Userinfo {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .avatar {
+      width: 40px;
+    }
+  }
+  .icons {
+    display: flex;
+    gap: 20px;
+  }
+  p {
+    font-size: 20px;
+    font-weight: bold;
+  }
+}
+
+/* Icons Section Started */
+.more {
+  width: 20px;
+  cursor: pointer;
+}
+.edit {
+  width: 20px;
+  cursor: pointer;
+}
+.video {
+  width: 20px;
+  cursor: pointer;
+}
+
+/* Icons Section Ended */

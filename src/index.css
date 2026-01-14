@@ -1,0 +1,19 @@
+body {
+  background-image: url(/public/BG-1.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.container {
+  width: 90vw;
+  height: 100vh;
+  background-color: rgba(17, 25, 40, 0.75);
+  border-radius: 12px;
+  backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  display: flex;
+}
