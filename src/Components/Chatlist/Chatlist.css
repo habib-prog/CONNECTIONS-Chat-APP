@@ -1,47 +1,58 @@
+/* Chatlist Container */
+.Chatlist {
+  flex: 1;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  height: 100vh; /* Ba apnar proyojon moto height */
+}
+
+/* Scrollbar Styling */
+.Chatlist::-webkit-scrollbar {
+  width: 4px;
+}
+.Chatlist::-webkit-scrollbar-track {
+  background: transparent;
+}
+.Chatlist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Search Bar - Ekhane fixed/sticky kora hoyeche */
 .search {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 20px;
-  .searchbar {
-    flex: 1;
-    display: flex;
-    background-color: rgba(17, 25, 40, 0.5);
-    align-items: center;
-    border-radius: 20px;
-  }
-  input {
-    background-color: transparent;
-    border: none;
-    outline: none;
-    color: white;
-    flex: 1;
-    padding: 6px;
-  }
+  padding: 2px;
+
+  /* --- Fixed/Sticky Logic --- */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Jate niche theke text na dekha jay, tai background color add kora hoyeche */
+  background-color: rgba(36, 36, 49, 0.95);
 }
 
-.Chatlist {
+.search .searchbar {
   flex: 1;
-  overflow-y: auto;
-
-  background: rgba(255, 255, 255, 0.05); /* semi transparent */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
-}
-.Chatlist::-webkit-scrollbar {
-  width: 4px;
+  display: flex;
+  background-color: rgba(30, 31, 33, 0.5);
+  align-items: center;
+  border-radius: 20px;
 }
 
-.Chatlist::-webkit-scrollbar-track {
-  background: transparent;
+.search input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  flex: 1;
+  padding: 8px;
 }
 
-.Chatlist::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(6px);
-  border-radius: 10px;
-}
-/* USER ID LIST Start*/
+/* User ID List Items */
 .items {
   display: flex;
   align-items: center;
@@ -49,35 +60,49 @@
   padding: 20px;
   cursor: pointer;
   border-bottom: 1px solid #dddddd35;
+  transition: background-color 0.3s ease;
 }
-.text {
+
+.items:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.texts {
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
-p {
-  font-family: Arial, Helvetica, sans-serif;
-}
-span {
-  font-family: Arial, Helvetica, sans-serif;
-}
+
 .username {
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  color: white;
   margin: 0;
-  padding: 0;
 }
+
 .lastMsg {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #ccc;
   margin: 0;
 }
-/* USER ID LIST End*/
+
 .searchIcon {
   width: 15px;
-  padding: 5px;
+  padding: 10px;
   cursor: pointer;
+}
+
+.userList {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .add {
-  width: 20px;
+  width: 24px;
+  height: 23px;
+  background-color: rgba(17, 25, 40, 0.5);
+  padding: 10px;
+  border-radius: 10px;
   cursor: pointer;
-}
-.userList {
-  width: 30px;
 }
