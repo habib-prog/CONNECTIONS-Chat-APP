@@ -1,3 +1,120 @@
+/* =====================
+   Main Container
+===================== */
 .details {
   flex: 1;
+  h2 {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  span {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  p {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+  }
+}
+
+/* =====================
+   User Section
+===================== */
+.details .user {
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #dddddd35;
+}
+
+.details .avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* =====================
+   User Info Section
+===================== */
+.details .userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* =====================
+   Option Section
+===================== */
+.option .title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =====================
+   Icons
+===================== */
+.iconsize {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
+  background: rgb(135, 112, 112);
+  padding: 2px;
+}
+
+/* =====================
+   Photos Section
+===================== */
+.photos {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.photoitems {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.photoitems .photodetail {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.photoitems .photodetail img {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.photoitems .photodetail span {
+  font-size: 14px;
+  color: lightgray;
+}
+
+/* =====================
+   Button
+===================== */
+button {
+  background-color: rgb(193, 41, 41);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all linear 0.3s;
+}
+
+button:hover {
+  background-color: red;
 }
