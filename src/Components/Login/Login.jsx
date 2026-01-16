@@ -6,8 +6,9 @@ import "react-toastify/dist/ReactToastify.css";
 
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   sendEmailVerification,
+  signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -38,9 +39,9 @@ const Login = () => {
         toast.warn("Please verify your email! Check your inbox.");
         await auth.signOut();
         return;
+      } else {
+        toast.success("Login Successful!");
       }
-
-      toast.success("Login Successful!");
     } catch (err) {
       // Password ba Email bhul hole ekhane asbe
       if (err.code === "auth/invalid-credential") {
@@ -50,6 +51,23 @@ const Login = () => {
       }
     }
   };
+  // Cloudinary Utility
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "Chat_app");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dlgwrts8q/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    return data.secure_url;
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -58,26 +76,43 @@ const Login = () => {
     const { username, email, password } = Object.fromEntries(formData);
 
     try {
-      // Create User
+      // 1️Create Firebase User
       const res = await createUserWithEmailAndPassword(auth, email, password);
+
+      // 2️Send Email Verification
       await sendEmailVerification(res.user);
 
-      // Save User Info with Username in Firestore
+      // 3️ Upload Avatar to Cloudinary (if exists)
+      const avatarURL = avatar.file
+        ? await uploadToCloudinary(avatar.file)
+        : "";
+
+      // 4️ Update Firebase Auth user object
+      await updateProfile(res.user, {
+        displayName: username,
+        photoURL: avatarURL,
+      });
+
+      // 5️Save user in Firestore
       await setDoc(doc(db, "users", res.user.uid), {
+        id: res.user.uid,
         username,
         email,
-        id: res.user.uid,
+        avatar: avatarURL,
         blocked: [],
-        avatar: "", // Ekhane storage link pore add kora jabe
+        createdAt: new Date(),
       });
 
-      // Initialize User Chats
-      await setDoc(doc(db, "userschats", res.user.uid), {
-        chats: [],
-      });
+      // 6️Initialize User Chats
+      await setDoc(doc(db, "userschats", res.user.uid), { chats: [] });
+      await auth.signOut();
 
+      // 7️Toasts
       toast.success("Account created successfully!");
       toast.warning("Email verification link sent!");
+
+      // 8️Clear avatar state
+      setAvatar({ file: null, url: "" });
     } catch (err) {
       toast.error(err.message);
     }
