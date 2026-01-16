@@ -1,7 +1,15 @@
 import React from "react";
 import "./Details.css";
+import { auth } from "../../Database";
 
 const Details = () => {
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="details">
       <div className="user">
@@ -51,7 +59,7 @@ const Details = () => {
           </div>
         </div>
         <button>Block User</button>
-        <button>Log Out</button>
+        <button onClick={handleLogout}>Log Out</button>
       </div>
     </div>
   );
