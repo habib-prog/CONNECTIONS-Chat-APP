@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { ToastContainer, toast } from "react-toastify";
+import { auth, db } from "../../Database";
+
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 const Login = () => {
   const [avatar, setAvatar] = useState({
@@ -22,9 +26,23 @@ const Login = () => {
     toast.success("Login submitted");
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    console.log("Signup submitted", avatar);
+
+    const formData = new FormData(e.target);
+    const { email, password } = Object.fromEntries(formData);
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      // Add a new document in collection "cities"
+      await setDoc(doc(db, "users", res.user.uid), {
+        email,
+        id: res.user.uid,
+        blocked: [],
+      });
+      toast.success("Sign up completed");
+    } catch (err) {
+      toast.error(err);
+    }
   };
 
   return (
@@ -36,11 +54,21 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>Email</label>
-            <input type="email" placeholder="Enter your email" required />
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" required />
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              required
+            />
           </div>
           <button type="submit" className="btn-primary">
             Login
@@ -85,11 +113,21 @@ const Login = () => {
           </div>
           <div className="form-group">
             <label>Email</label>
-            <input type="email" placeholder="Enter your email" required />
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" required />
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              required
+            />
           </div>
           <button type="submit" className="btn-primary">
             Sign Up
