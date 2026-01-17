@@ -6,14 +6,13 @@ import "./Userinfo.css";
 const Userinfo = () => {
   const [user, setUser] = useState({
     username: "",
-    avatar: "",
+    avat: "",
   });
 
   useEffect(() => {
     const fetchUser = async () => {
       const uid = auth.currentUser?.uid;
       if (!uid) return;
-
       const docRef = doc(db, "users", uid);
       const docSnap = await getDoc(docRef);
 
@@ -24,7 +23,6 @@ const Userinfo = () => {
         });
       }
     };
-
     fetchUser();
   }, []);
 

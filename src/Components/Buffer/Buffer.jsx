@@ -51,7 +51,7 @@ const StyledWrapper = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #050a13;
+  
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,7 +64,7 @@ const StyledWrapper = styled.div`
     align-items: center;
   }
 
-  /* বাউন্স টেক্সট স্টাইল */
+  
   .bounce-text {
     margin-top: 40px;
     color: #ff8147;
@@ -85,7 +85,7 @@ const StyledWrapper = styled.div`
     to {
       transform: translateY(-20px);
       text-shadow: 0 30px 20px rgba(0, 0, 0, 0.3);
-      color: #00ccff; /* বাউন্স করলে রঙ পরিবর্তন হবে */
+      color: #00ccff; 
     }
   }
 
