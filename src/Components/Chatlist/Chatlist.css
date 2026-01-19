@@ -106,3 +106,22 @@
   border-radius: 10px;
   cursor: pointer;
 }
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.unread-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #5183fe;
+  border-radius: 50%;
+  position: absolute;
+  right: 20px;
+}

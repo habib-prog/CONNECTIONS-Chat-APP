@@ -9,14 +9,16 @@ export const useAuthStore = create((set) => ({
   listenAuth: () => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user && user.emailVerified) {
-        set({ currentUser: user });
+        set({
+          currentUser: user,
+          loading: false,
+        });
       } else {
-        set({ currentUser: null });
+        set({
+          currentUser: null,
+          loading: false,
+        });
       }
-
-      setTimeout(() => {
-        set({ loading: false });
-      }, 1900);
     });
 
     return unsub;

@@ -1,42 +1,144 @@
 import React, { useState } from "react";
 import "./Adduser.css";
 import { db } from "../../Database";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { useUserStore } from "../../ZustandStore/useUserStore";
 
 const Adduser = () => {
-  const [queryText, setQueryText] = useState("");
-  const [searchedUser, setSearchedUser] = useState(null);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const { currentuser } = useUserStore();
+
+  // 🔍 SEARCH USER
   const handleSearch = async (e) => {
     e.preventDefault();
     setError("");
-    setSearchedUser(null);
+    setUser(null);
 
-    if (!queryText.trim()) {
-      setError("Username লিখো");
-      return;
-    }
+    const formData = new FormData(e.target);
+    const username = formData.get("username")?.trim();
+
+    if (!username) return;
 
     try {
       const q = query(
         collection(db, "users"),
-        where("username", "==", queryText)
+        where("username", "==", username),
       );
 
-      const querySnapshot = await getDocs(q);
+      const snapshot = await getDocs(q);
 
-      if (querySnapshot.empty) {
-        setError("User পাওয়া যায়নি");
+      if (!snapshot.empty) {
+        setUser({
+          ...snapshot.docs[0].data(),
+          id: snapshot.docs[0].id,
+        });
+      } else {
+        setError("User not found!");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong");
+    }
+  };
+
+  // ➕ ADD USER
+  const handleAdd = async () => {
+    if (loading || !user) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      if (user.id === currentuser.id) {
+        setError("You cannot add yourself!");
+        setLoading(false);
         return;
       }
 
-      querySnapshot.forEach((doc) => {
-        setSearchedUser(doc.data());
+      const chatId =
+        currentuser.id > user.id
+          ? `${currentuser.id}_${user.id}`
+          : `${user.id}_${currentuser.id}`;
+
+      const chatRef = doc(db, "chats", chatId);
+
+      // 1️⃣ create chat doc if not exists
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          createdAt: serverTimestamp(),
+          messages: [],
+        });
+      }
+
+      // 2️⃣ Update CURRENT USER chat list
+      const currentUserChatsRef = doc(db, "userschats", currentuser.id);
+      const currentUserChatsSnap = await getDoc(currentUserChatsRef);
+      const currentChats = currentUserChatsSnap.exists()
+        ? currentUserChatsSnap.data().chats || []
+        : [];
+
+      const alreadyAdded = Array.isArray(currentChats)
+        ? currentChats.some((c) => c.chatId === chatId)
+        : false;
+
+      if (alreadyAdded) {
+        setError("User already added!");
+        setLoading(false);
+        return;
+      }
+
+      await updateDoc(currentUserChatsRef, {
+        chats: arrayUnion({
+          chatId,
+          receiverId: user.id,
+          lastMessage: "",
+          updatedAt: Date.now(),
+        }),
       });
+
+      // 3️⃣ Update RECEIVER chat list (optional)
+      const receiverChatsRef = doc(db, "userschats", user.id);
+      const receiverChatsSnap = await getDoc(receiverChatsRef);
+      const receiverChats = receiverChatsSnap.exists()
+        ? receiverChatsSnap.data().chats || []
+        : [];
+
+      const alreadyAddedReceiver = Array.isArray(receiverChats)
+        ? receiverChats.some((c) => c.chatId === chatId)
+        : false;
+
+      if (!alreadyAddedReceiver) {
+        await updateDoc(receiverChatsRef, {
+          chats: arrayUnion({
+            chatId,
+            receiverId: currentuser.id,
+            lastMessage: "",
+            updatedAt: Date.now(),
+          }),
+        });
+      }
+
+      setUser(null);
+      setError("");
     } catch (err) {
-      console.log(err);
-      setError("Something went wrong");
+      console.error(err);
+      setError("Failed to add user");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,25 +147,33 @@ const Adduser = () => {
       <form onSubmit={handleSearch}>
         <input
           type="text"
+          name="username"
           placeholder="Search user by username"
-          value={queryText}
-          onChange={(e) => setQueryText(e.target.value)}
         />
-        <button type="submit">Search</button>
+        <button type="submit" disabled={loading}>
+          Search
+        </button>
       </form>
 
       {error && <p className="error">{error}</p>}
 
-      {searchedUser && (
+      {user && (
         <div className="user">
           <div className="detail">
             <img
               className="avatar"
-              src={searchedUser.avatar || "/default-avatar.png"}
+              src={user.avatar || "/avatar.png"}
               alt="avatar"
             />
-            <p>{searchedUser.username}</p>
-            <button>Add</button>
+            <p>{user.username}</p>
+
+            <button
+              onClick={handleAdd}
+              disabled={loading}
+              style={{ pointerEvents: loading ? "none" : "auto" }}
+            >
+              {loading ? "Adding..." : "Add"}
+            </button>
           </div>
         </div>
       )}

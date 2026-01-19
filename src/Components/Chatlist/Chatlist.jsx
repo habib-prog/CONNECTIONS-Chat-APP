@@ -1,9 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Chatlist.css";
 import Adduser from "../Adduser/Adduser";
+import { useUserStore } from "../../ZustandStore/useUserStore";
+import { useChatStore } from "../../ZustandStore/useChatStore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { db } from "../../Database";
 
 const Chatlist = () => {
   const [addMode, setaddMode] = useState(false);
+  const [chats, setChats] = useState([]);
+
+  const { currentuser } = useUserStore();
+  const { setChat } = useChatStore();
+
+  useEffect(() => {
+    if (!currentuser?.id) return;
+
+    const unSub = onSnapshot(
+      doc(db, "userschats", currentuser.id),
+      async (res) => {
+        const data = res.data();
+        if (!data) return;
+
+        const items = data.chats || [];
+
+        const promises = items.map(async (item) => {
+          const userDocRef = doc(db, "users", item.receiverId);
+          const userDocSnap = await getDoc(userDocRef);
+          const user = userDocSnap.data();
+
+          // ✅ last message logic
+          const lastMsg = item.lastMessage || "";
+
+          return {
+            ...item,
+            user: { ...user, id: item.receiverId },
+            lastMessage: lastMsg,
+          };
+        });
+
+        const chatData = await Promise.all(promises);
+
+        // Sort by updatedAt (recent first)
+        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+      },
+    );
+
+    return () => unSub();
+  }, [currentuser.id]);
+
+  const handleSelected = (chat) => {
+    setChat(chat.chatId, chat.user);
+  };
+
   return (
     <div className="Chatlist">
       <div className="search">
@@ -18,63 +67,27 @@ const Chatlist = () => {
           onClick={() => setaddMode((prev) => !prev)}
         />
       </div>
-      {/* User ID List */}
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
+
+      {chats.map((chat) => (
+        <div
+          className="items"
+          key={chat.chatId}
+          onClick={() => handleSelected(chat)}
+        >
+          <img
+            className="userList"
+            src={chat.user?.avatar || "/public/woman.png"}
+            alt=""
+          />
+          <div className="texts">
+            <span className="username">{chat.user?.username || "User"}</span>
+            <p className="lastMsg">
+              {chat.lastMessage ? chat.lastMessage : "No messages yet"}{" "}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Alyson Jaden</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Sanjida Lisa</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
-      <div className="items">
-        <img className="userList" src="/public/woman.png" alt="" />
-        <div className="texts">
-          <span className="username">Adiled Talukder</span>
-          <p className="lastMsg">Hi! James</p>
-        </div>
-      </div>
+      ))}
+
       {addMode && <Adduser />}
     </div>
   );
