@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useRef, useState } from "react";
 import "./Chat.css";
 import EmojiPicker from "emoji-picker-react";
