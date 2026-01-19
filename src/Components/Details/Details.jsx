@@ -20,7 +20,9 @@ const Details = () => {
     isReceiverBlocked,
     changeBlock,
   } = useChatStore();
+
   const [sharedPhotos, setSharedPhotos] = useState([]);
+  const [isOpen, setIsOpen] = useState(true); // Toggle logic-er jonno state
 
   // Shared photos dynamic fetch
   useEffect(() => {
@@ -54,7 +56,7 @@ const Details = () => {
           ? arrayRemove(chatUser.id)
           : arrayUnion(chatUser.id),
       });
-      changeBlock(); // Zustand store update
+      changeBlock();
     } catch (err) {
       console.log(err);
     }
@@ -82,33 +84,46 @@ const Details = () => {
 
       <div className="userInfo">
         <div className="option">
-          <div className="title">
+          <div
+            className="title"
+            onClick={() => setIsOpen((prev) => !prev)}
+            style={{ cursor: "pointer" }}
+          >
             <span>Shared Photos</span>
-            <img className="iconsize" src="/public/down.png" alt="" />
+            <img
+              className="iconsize"
+              src={isOpen ? "/public/down.png" : "/public/up.png"}
+              alt=""
+              style={{ transform: isOpen ? "rotate(0deg)" : "rotate(180deg)" }}
+            />
           </div>
-          <div className="photos">
-            {sharedPhotos.length > 0 ? (
-              sharedPhotos.map((photo, index) => (
-                <div className="photoitems" key={index}>
-                  <div className="photodetail">
-                    <img src={photo.url} alt="" />
-                    <span>
-                      {photo.createdAt?.toDate().toLocaleDateString()}
-                    </span>
+
+          {/* Content scrollable thakbe jodi isOpen true hoy */}
+          {isOpen && (
+            <div className="photos">
+              {sharedPhotos.length > 0 ? (
+                sharedPhotos.map((photo, index) => (
+                  <div className="photoitems" key={index}>
+                    <div className="photodetail">
+                      <img src={photo.url} alt="" />
+                      <span>
+                        {photo.createdAt?.toDate().toLocaleDateString()}
+                      </span>
+                    </div>
+                    <a href={photo.url} target="_blank" rel="noreferrer">
+                      <img
+                        className="iconsize"
+                        src="/public/download.png"
+                        alt=""
+                      />
+                    </a>
                   </div>
-                  <a href={photo.url} target="_blank" rel="noreferrer">
-                    <img
-                      className="iconsize"
-                      src="/public/download.png"
-                      alt=""
-                    />
-                  </a>
-                </div>
-              ))
-            ) : (
-              <p className="no-photo">No photos shared</p>
-            )}
-          </div>
+                ))
+              ) : (
+                <p className="no-photo">No photos shared</p>
+              )}
+            </div>
+          )}
         </div>
 
         <button className="blockBtn" onClick={handleBlock}>

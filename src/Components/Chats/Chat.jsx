@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useRef, useState } from "react";
 import "./Chat.css";
 import EmojiPicker from "emoji-picker-react";
@@ -17,7 +19,10 @@ const Chat = () => {
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
 
-  // DNT (Do Not Type) and Typing States
+  // Image states
+  const [img, setImg] = useState({ file: null, url: "" });
+  const [uploading, setUploading] = useState(false);
+
   const [dntActive, setDntActive] = useState(false);
   const [dntOwnerId, setDntOwnerId] = useState(null);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
@@ -26,10 +31,37 @@ const Chat = () => {
   const typingTimeoutRef = useRef(null);
 
   const { currentuser } = useUserStore();
-  const { chatId, chatUser } = useChatStore();
+  const { chatId, chatUser, isCurrentUserBlocked, isReceiverBlocked } =
+    useChatStore();
 
-  // Logic: Amr input ki lock thakbe?
-  const isInputLocked = dntActive && dntOwnerId !== currentuser.id;
+  const isInputLocked =
+    (dntActive && dntOwnerId !== currentuser.id) ||
+    isCurrentUserBlocked ||
+    isReceiverBlocked;
+
+  // ================= CLOUDINARY UPLOAD =================
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "Chat_app");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dlgwrts8q/image/upload",
+      { method: "POST", body: formData },
+    );
+
+    const data = await res.json();
+    return data.secure_url;
+  };
+
+  const handleImg = (e) => {
+    if (e.target.files[0]) {
+      setImg({
+        file: e.target.files[0],
+        url: URL.createObjectURL(e.target.files[0]),
+      });
+    }
+  };
 
   // ================= EMOJI LOGIC =================
   const addEmoji = (emojiData) => {
@@ -38,38 +70,21 @@ const Chat = () => {
     setOpen(false);
   };
 
-  // ================= REALTIME SYNC =================
+  // ================= REAL-TIME SYNC =================
   useEffect(() => {
     if (!chatId) return;
-
-    const chatRef = doc(db, "chats", chatId);
-
-    const unsub = onSnapshot(chatRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-
-      setMessages(data.messages || []);
-
-      // 1. DNT Status Sync Ke DNT on kose seta check kora
-      if (data.dntStatus?.active) {
-        setDntActive(true);
-        setDntOwnerId(data.dntStatus.ownerId);
-      } else {
-        setDntActive(false);
-        setDntOwnerId(null);
-      }
-
-      // 2. Typing Indicator Sync
-      if (
-        data.typingStatus?.isTyping &&
-        data.typingStatus?.typerId !== currentuser.id
-      ) {
-        setIsOtherTyping(true);
-      } else {
-        setIsOtherTyping(false);
+    const unsub = onSnapshot(doc(db, "chats", chatId), (res) => {
+      const data = res.data();
+      if (data) {
+        setMessages(data.messages || []);
+        setDntActive(data.dntStatus?.active || false);
+        setDntOwnerId(data.dntStatus?.ownerId || null);
+        setIsOtherTyping(
+          data.typingStatus?.isTyping &&
+            data.typingStatus?.typerId !== currentuser.id,
+        );
       }
     });
-
     return () => unsub();
   }, [chatId, currentuser.id]);
 
@@ -83,57 +98,62 @@ const Chat = () => {
   };
 
   const handleInputChange = (e) => {
-    const val = e.target.value;
-    setText(val);
-
-    if (val.length > 0) {
-      updateTypingStatus(true);
-      // 3 second por typing indicator auto off hobe
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = setTimeout(() => {
-        updateTypingStatus(false);
-      }, 3000);
-    } else {
-      updateTypingStatus(false);
-    }
+    setText(e.target.value);
+    updateTypingStatus(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(
+      () => updateTypingStatus(false),
+      3000,
+    );
   };
 
-  // ================= TOGGLE DNT (MANUAL) =================
+  // ================= TOGGLE DNT =================
   const toggleDNT = async () => {
-    if (!chatId) return;
-    // Jodi onno keu agei DNT on kore thake, tahole ami kichu korte parbo na
-    if (dntActive && dntOwnerId !== currentuser.id) return;
-
+    if (!chatId || (dntActive && dntOwnerId !== currentuser.id)) return;
     const newState = !dntActive;
     await updateDoc(doc(db, "chats", chatId), {
       dntStatus: {
         active: newState,
         ownerId: newState ? currentuser.id : null,
       },
-      "typingStatus.isTyping": false, // DNT toggle korle typing reset
+      "typingStatus.isTyping": false,
     });
   };
 
   // ================= AUTO SCROLL =================
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, img.url]);
 
   // ================= SEND MESSAGE =================
   const handleSend = async () => {
-    if (!text.trim() || !chatId || isInputLocked) return;
+    if ((!text.trim() && !img.file) || !chatId || isInputLocked) return;
 
-    await updateDoc(doc(db, "chats", chatId), {
-      messages: arrayUnion({
-        senderId: currentuser.id,
-        text,
-        createdAt: Timestamp.now(),
-        status: "sent",
-      }),
-      "typingStatus.isTyping": false, // Send korle typing off hobe
-    });
+    try {
+      setUploading(true);
+      let imgUrl = null;
 
-    setText("");
+      if (img.file) {
+        imgUrl = await uploadToCloudinary(img.file);
+      }
+
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentuser.id,
+          text: text.trim(),
+          createdAt: Timestamp.now(),
+          ...(imgUrl && { image: imgUrl }),
+        }),
+        "typingStatus.isTyping": false,
+      });
+
+      setText("");
+      setImg({ file: null, url: "" });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -152,10 +172,10 @@ const Chat = () => {
               {isOtherTyping ? (
                 <b style={{ color: "#5183fe" }}>Typing...</b>
               ) : dntActive ? (
-                <span style={{ color: "#ff4d4d", fontSize: "12px" }}>
+                <span style={{ color: "#ff4d4d" }}>
                   {dntOwnerId === currentuser.id
-                    ? "DNT Mode: Your Turn"
-                    : `${chatUser?.username} is typing...`}
+                    ? "DNT: You are in control..."
+                    : "DNT: Can't type while reciever is typing.."}
                 </span>
               ) : (
                 "Active now"
@@ -164,32 +184,11 @@ const Chat = () => {
           </div>
         </div>
 
-        <div
-          className="icons"
-          style={{ display: "flex", alignItems: "center" }}
-        >
-          {/*  DNT  BUTTON */}
+        <div className="icons">
           <button
             onClick={toggleDNT}
+            className={`dnt-btn ${dntActive ? "active" : ""}`}
             disabled={dntActive && dntOwnerId !== currentuser.id}
-            style={{
-              padding: "5px 12px",
-              borderRadius: "5px",
-              border: "none",
-              cursor:
-                dntActive && dntOwnerId !== currentuser.id
-                  ? "not-allowed"
-                  : "pointer",
-              backgroundColor: dntActive
-                ? dntOwnerId === currentuser.id
-                  ? "#ff4d4d"
-                  : "#444"
-                : "#4caf50",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: "bold",
-              marginRight: "10px",
-            }}
           >
             {dntActive
               ? dntOwnerId === currentuser.id
@@ -197,9 +196,6 @@ const Chat = () => {
                 : "LOCKED"
               : "START DNT"}
           </button>
-
-          <img className="iconsize" src="/public/phone-call.png" alt="" />
-          <img className="iconsize" src="/public/video (1).png" alt="" />
           <img className="iconsize" src="/public/info.png" alt="" />
         </div>
       </div>
@@ -212,9 +208,13 @@ const Chat = () => {
             className={`msg ${msg.senderId === currentuser.id ? "own" : ""}`}
           >
             <div className="texts">
-              <p className="content">{msg.text}</p>
+              {msg.image && <img src={msg.image} alt="" className="msg-img" />}
+              {msg.text && <p className="content">{msg.text}</p>}
               <span className="time">
-                {msg.createdAt?.toDate().toLocaleTimeString()}
+                {msg.createdAt?.toDate().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </span>
             </div>
           </div>
@@ -224,52 +224,76 @@ const Chat = () => {
 
       {/* ========== BOTTOM ========== */}
       <div className="bottom">
-        <div className="icons">
-          <img className="iconsize" src="/public/image-.png" alt="" />
-          <img className="iconsize" src="/public/camera.png" alt="" />
-          <img className="iconsize" src="/public/mic.png" alt="" />
-        </div>
-
-        <input
-          type="text"
-          placeholder={
-            isInputLocked
-              ? `Wait for ${chatUser?.username}...`
-              : "Write message..."
-          }
-          value={text}
-          onChange={handleInputChange}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          disabled={isInputLocked}
-          style={{
-            cursor: isInputLocked ? "not-allowed" : "text",
-            opacity: isInputLocked ? 0.6 : 1,
-          }}
-        />
-
-        <div className="emoji">
-          <img
-            className="iconsize"
-            src="/public/emoji.png"
-            alt=""
-            onClick={() => !isInputLocked && setOpen((prev) => !prev)}
-          />
-          {open && (
-            <div className="picker">
-              <EmojiPicker open={open} onEmojiClick={addEmoji} />
+        {img.url && (
+          <div className="img-preview-box">
+            <img src={img.url} alt="preview" />
+            <div
+              className="delete-img"
+              onClick={() => setImg({ file: null, url: "" })}
+            >
+              X
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div
-          className="sendbtn"
-          onClick={handleSend}
-          style={{
-            opacity: isInputLocked || !text.trim() ? 0.5 : 1,
-            cursor: isInputLocked || !text.trim() ? "not-allowed" : "pointer",
-          }}
-        >
-          Send
+        <div className="bottom-content">
+          <div className="icons">
+            <label htmlFor="file">
+              <img
+                className="iconsize"
+                src="/public/image-.png"
+                alt=""
+                style={{ opacity: isInputLocked ? 0.4 : 1 }}
+              />
+            </label>
+            <input
+              type="file"
+              id="file"
+              style={{ display: "none" }}
+              onChange={handleImg}
+              disabled={isInputLocked}
+            />
+          </div>
+
+          <input
+            type="text"
+            placeholder={
+              isInputLocked
+                ? `Locked by ${chatUser?.username}...`
+                : "Write message..."
+            }
+            value={text}
+            onChange={handleInputChange}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            disabled={isInputLocked}
+          />
+
+          <div className="emoji">
+            <img
+              className="iconsize"
+              src="/public/emoji.png"
+              alt=""
+              onClick={() => !isInputLocked && setOpen((prev) => !prev)}
+            />
+            {open && (
+              <div className="picker">
+                <EmojiPicker onEmojiClick={addEmoji} />
+              </div>
+            )}
+          </div>
+
+          <div
+            className="sendbtn"
+            onClick={handleSend}
+            style={{
+              opacity:
+                isInputLocked || (!text.trim() && !img.file) || uploading
+                  ? 0.5
+                  : 1,
+            }}
+          >
+            {uploading ? "..." : "Send"}
+          </div>
         </div>
       </div>
     </div>

@@ -3,16 +3,18 @@
 ===================== */
 .details {
   flex: 1;
-  h2 {
-    font-family: Arial, Helvetica, sans-serif;
-  }
-  span {
-    font-family: Arial, Helvetica, sans-serif;
-  }
-  p {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-  }
+  display: flex;
+  flex-direction: column;
+}
+
+.details h2,
+.details span,
+.details p {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.details p {
+  text-align: center;
 }
 
 /* =====================
@@ -42,6 +44,7 @@
   flex-direction: column;
   gap: 20px;
   padding: 20px;
+  overflow-y: auto; /* Purata scrollable rakhar jonno */
 }
 
 /* =====================
@@ -51,30 +54,28 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 /* =====================
-   Icons
-===================== */
-.iconsize {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-  border-radius: 50%;
-  background: rgb(135, 112, 112);
-  padding: 2px;
-}
-
-/* =====================
-   Photos Section
+   Photos Section (Scroll Logic ekhane)
 ===================== */
 .photos {
-  margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
+  max-height: 200px; /* Eita fix height rakhe, er beshi hole scroll hobe */
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Custom Scrollbar Styling */
+.photos::-webkit-scrollbar {
+  width: 4px;
+}
+.photos::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
 }
 
 .photoitems {
@@ -86,35 +87,52 @@
 .photoitems .photodetail {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .photoitems .photodetail img {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 5px;
   object-fit: cover;
 }
 
 .photoitems .photodetail span {
-  font-size: 14px;
+  font-size: 13px;
   color: lightgray;
 }
 
 /* =====================
-   Button
+   Icons & Buttons
 ===================== */
+.iconsize {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.8;
+  background: rgb(135, 112, 112);
+  padding: 4px;
+  border-radius: 50%;
+}
+
 button {
   background-color: rgb(193, 41, 41);
   border: none;
   color: white;
-  padding: 10px 20px;
+  padding: 10px;
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
-  transition: all linear 0.3s;
+  transition: 0.3s;
 }
 
 button:hover {
   background-color: red;
+}
+
+.logout {
+  background-color: #1a1a1a;
+}
+.logout:hover {
+  background-color: #333;
 }
