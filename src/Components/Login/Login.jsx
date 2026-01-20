@@ -62,7 +62,7 @@ const Login = () => {
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     const data = await res.json();
@@ -76,11 +76,13 @@ const Login = () => {
     const { username, email, password } = Object.fromEntries(formData);
 
     try {
-      // 1️Create Firebase User
+      // 1️Create Firebase User start
       const res = await createUserWithEmailAndPassword(auth, email, password);
+      // 1️Create Firebase User start end
 
       // 2️Send Email Verification
       await sendEmailVerification(res.user);
+      //  2 Send verification ended
 
       // 3️ Upload Avatar to Cloudinary (if exists)
       const avatarURL = avatar.file
@@ -121,6 +123,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <ToastContainer position="bottom-right" />
+      <h1 className="Title">Connections</h1>
 
       {/* Login Section */}
       <div className="auth-section">

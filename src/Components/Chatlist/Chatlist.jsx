@@ -82,7 +82,10 @@ const Chatlist = () => {
           <div className="texts">
             <span className="username">{chat.user?.username || "User"}</span>
             <p className="lastMsg">
-              {chat.lastMessage ? chat.lastMessage : "No messages yet"}{" "}
+              {chat.lastMessage
+                ? chat.lastMessage.split(" ").slice(0, 3).join(" ") +
+                  (chat.lastMessage.split(" ").length > 3 ? "..." : "")
+                : "No messages yet"}
             </p>
           </div>
         </div>

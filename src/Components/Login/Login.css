@@ -11,7 +11,13 @@
   justify-content: center;
   padding: 40px;
 }
-
+.Title {
+  font-family: sans-serif;
+  font-weight: 600;
+  background-color: rgb(32, 218, 51);
+  padding: 8px;
+  border-radius: 8px;
+}
 .auth-section {
   background: rgba(255, 255, 255, 0.08);
   padding: 10px;

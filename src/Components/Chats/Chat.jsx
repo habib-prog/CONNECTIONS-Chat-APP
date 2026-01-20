@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./Chat.css";
 import EmojiPicker from "emoji-picker-react";
 import {
+  getDoc,
   doc,
   onSnapshot,
   updateDoc,
@@ -68,7 +69,7 @@ const Chat = () => {
     setOpen(false);
   };
 
-  // ================= REAL-TIME SYNC =================
+  // ================= REAL-TIME SYNC start =================
   useEffect(() => {
     if (!chatId) return;
     const unsub = onSnapshot(doc(db, "chats", chatId), (res) => {
@@ -86,7 +87,9 @@ const Chat = () => {
     return () => unsub();
   }, [chatId, currentuser.id]);
 
-  // ================= TYPING HANDLER =================
+  // ================= REAL-TIME SYNC start =================
+
+  // ================= TYPING HANDLER start =================
   const updateTypingStatus = async (typing) => {
     if (!chatId || isInputLocked) return;
     await updateDoc(doc(db, "chats", chatId), {
@@ -94,6 +97,8 @@ const Chat = () => {
       "typingStatus.typerId": typing ? currentuser.id : null,
     });
   };
+
+  // ================= TYPING HANDLER end =================
 
   const handleInputChange = (e) => {
     setText(e.target.value);
@@ -124,6 +129,7 @@ const Chat = () => {
   }, [messages, img.url]);
 
   // ================= SEND MESSAGE =================
+
   const handleSend = async () => {
     if ((!text.trim() && !img.file) || !chatId || isInputLocked) return;
 
@@ -135,6 +141,9 @@ const Chat = () => {
         imgUrl = await uploadToCloudinary(img.file);
       }
 
+      const messageContent = text.trim() || (imgUrl ? "Sent an image" : "");
+
+      // 1. Messages update kora
       await updateDoc(doc(db, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentuser.id,
@@ -145,6 +154,31 @@ const Chat = () => {
         "typingStatus.isTyping": false,
       });
 
+      // 2. Chatlist (userschats) update kora - jate preview r sorting thik thake
+      const userIDs = [currentuser.id, chatUser.id];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userschats", id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId,
+          );
+
+          // Last message update logic
+          userChatsData.chats[chatIndex].lastMessage = messageContent;
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentuser.id ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now(); // Sort korar jonno time
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
+
       setText("");
       setImg({ file: null, url: "" });
     } catch (err) {
@@ -153,7 +187,6 @@ const Chat = () => {
       setUploading(false);
     }
   };
-
   return (
     <div className="chats">
       {/* ========== TOP ========== */}

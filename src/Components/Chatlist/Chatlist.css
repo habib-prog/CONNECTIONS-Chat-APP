@@ -32,13 +32,13 @@
   top: 0;
   z-index: 10;
   /* Jate niche theke text na dekha jay, tai background color add kora hoyeche */
-  background-color: rgba(36, 36, 49, 0.95);
+  /* background-color: rgba(36, 36, 49, 0.95); */
 }
 
 .search .searchbar {
   flex: 1;
   display: flex;
-  background-color: rgba(30, 31, 33, 0.5);
+  /* background-color: rgba(30, 31, 33, 0.5); */
   align-items: center;
   border-radius: 20px;
 }
@@ -78,12 +78,22 @@
   color: white;
   margin: 0;
 }
-
 .lastMsg {
   font-family: Arial, sans-serif;
   font-size: 14px;
   color: #ccc;
   margin: 0;
+
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Content jeno baire na jay */
 }
 
 .searchIcon {
