@@ -11,12 +11,15 @@
   justify-content: center;
   padding: 40px;
 }
-.Title {
-  font-family: sans-serif;
-  font-weight: 600;
-  background-color: rgb(32, 218, 51);
-  padding: 8px;
-  border-radius: 8px;
+.iconsizes {
+  width: 80px;
+}
+.logos {
+  width: 400px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .auth-section {
   background: rgba(255, 255, 255, 0.08);

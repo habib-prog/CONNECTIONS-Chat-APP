@@ -123,10 +123,12 @@ const Login = () => {
   return (
     <div className="auth-container">
       <ToastContainer position="bottom-right" />
-      <h1 className="Title">Connections</h1>
 
       {/* Login Section */}
       <div className="auth-section">
+        <div className="logos">
+          <img className="iconsizes" src="/public/chat.png" alt="" />
+        </div>
         <h2>Welcome Back</h2>
         <form onSubmit={handleLogin}>
           <div className="form-group">

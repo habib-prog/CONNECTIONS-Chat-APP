@@ -29,16 +29,25 @@
 
 /* Icons Section Started */
 .more {
-  width: 20px;
+  width: 18px;
   cursor: pointer;
+  padding: 4px;
+  background-color: rgb(125, 125, 206);
+  border-radius: 4px;
 }
 .edit {
-  width: 20px;
+  width: 18px;
   cursor: pointer;
+  padding: 4px;
+  background-color: rgb(125, 125, 206);
+  border-radius: 4px;
 }
 .video {
-  width: 20px;
+  width: 18px;
   cursor: pointer;
+  padding: 4px;
+  background-color: rgb(125, 125, 206);
+  border-radius: 4px;
 }
 
 /* Icons Section Ended */
