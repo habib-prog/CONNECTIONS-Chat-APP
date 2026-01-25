@@ -76,7 +76,7 @@ const Chatlist = () => {
         >
           <img
             className="userList"
-            src={chat.user?.avatar || "/public/woman.png"}
+            src={chat.user?.avatar || "/woman.png"}
             alt=""
           />
           <div className="texts">

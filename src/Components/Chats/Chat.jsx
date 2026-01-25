@@ -194,7 +194,7 @@ const Chat = () => {
         <div className="userinformation">
           <img
             className="avatar"
-            src={chatUser?.avatar || "/public/avatar.png"}
+            src={chatUser?.avatar || "/avatar.png"}
             alt="avatar"
           />
           <div className="text">
@@ -233,7 +233,7 @@ const Chat = () => {
                 : "LOCKED"
               : "START DNT"}
           </button>
-          <img className="iconsize" src="/public/info.png" alt="" />
+          <img className="iconsize" src="/info.png" alt="" />
         </div>
       </div>
 
@@ -278,7 +278,7 @@ const Chat = () => {
             <label htmlFor="file">
               <img
                 className="iconsize"
-                src="/public/image-.png"
+                src="/image-.png"
                 alt=""
                 style={{ opacity: isInputLocked ? 0.4 : 1 }}
               />
