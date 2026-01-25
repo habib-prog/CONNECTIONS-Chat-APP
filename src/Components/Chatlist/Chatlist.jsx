@@ -62,7 +62,7 @@ const Chatlist = () => {
         </div>
         <img
           className="add"
-          src={addMode ? "/public/minus.png" : "/public/add.png"}
+          src={addMode ? "/public/minus.png" : "/add.png"}
           alt=""
           onClick={() => setaddMode((prev) => !prev)}
         />
