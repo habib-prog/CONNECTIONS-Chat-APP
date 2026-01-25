@@ -201,12 +201,18 @@ const Chat = () => {
             <span className="uname">{chatUser?.username || "Chat"}</span>
             <p className="udes">
               {isOtherTyping ? (
-                <b style={{ color: "#5183fe" }}>Typing...</b>
+                <b style={{ color: "#5ffe51" }}>Typing...</b>
               ) : dntActive ? (
-                <span style={{ color: "#ff4d4d" }}>
+                <span
+                  style={{
+                    color: "#ff4d4d",
+                    fontWeight: "bolder",
+                    fontSize: "15px",
+                  }}
+                >
                   {dntOwnerId === currentuser.id
-                    ? "DNT: You are in control..."
-                    : "DNT: Can't type while reciever is typing.."}
+                    ? "DNT - You Are In Control..."
+                    : "DNT Can't type while reciever is typing.."}
                 </span>
               ) : (
                 "Active now"

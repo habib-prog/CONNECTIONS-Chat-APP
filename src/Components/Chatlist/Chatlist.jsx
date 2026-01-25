@@ -29,7 +29,7 @@ const Chatlist = () => {
           const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
 
-          // ✅ last message logic
+          // last message logic
           const lastMsg = item.lastMessage || "";
 
           return {
@@ -57,7 +57,7 @@ const Chatlist = () => {
     <div className="Chatlist">
       <div className="search">
         <div className="searchbar">
-          <img className="searchIcon" src="/public/search.png" alt="" />
+          <img className="searchIcon" src="/search.png" alt="" />
           <input type="text" placeholder="Search" />
         </div>
         <img

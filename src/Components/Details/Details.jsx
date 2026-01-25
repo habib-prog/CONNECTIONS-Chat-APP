@@ -92,7 +92,7 @@ const Details = () => {
             <span>Shared Photos</span>
             <img
               className="iconsize"
-              src={isOpen ? "/public/down.png" : "/public/up.png"}
+              src={isOpen ? "/down.png" : "/public/up.png"}
               alt=""
               style={{ transform: isOpen ? "rotate(0deg)" : "rotate(180deg)" }}
             />

@@ -1,12 +1,3 @@
-// // src/ZustandStore/useChatStore.js
-// import { create } from "zustand";
-
-// export const useChatStore = create((set) => ({
-//   chatId: null,
-//   chatUser: null, // selected user info
-//   setChat: (id, user) => set({ chatId: id, chatUser: user }),
-// }));
-
 import { create } from "zustand";
 import { useUserStore } from "./useUserStore";
 
@@ -50,7 +41,6 @@ export const useChatStore = create((set) => ({
     }
   },
 
-  // ✅ Ei function-ti missing chhilo
   changeBlock: () => {
     set((state) => ({
       ...state,
